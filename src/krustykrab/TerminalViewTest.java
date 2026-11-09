@@ -171,6 +171,7 @@ public class TerminalViewTest
         assertTrue(output().contains("6. top bun"));
         assertTrue(output().contains("7. Defend"));
         assertTrue(output().contains("8. Quit"));
+        assertTrue(output().contains("Choose:"));
     }
 
 
