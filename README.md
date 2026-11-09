@@ -41,59 +41,59 @@ Yes, with one caveat. No model class mentions `TerminalView` or `GameController`
 | Time limit on orders? | Figured out | Patience of 20 ticks; 0 means a walkout |
 | How does a player win or lose? | Figured out | Survive 60 ticks; lose on a stolen formula or 3 walkouts |
 | Points system? | Figured out | 10 + remaining patience per burger; -2 per wrong ingredient |
-| Harder tasks over time? Special characters (Patrick)? | Still open | Not built: every customer orders the same six-step recipe and nothing gets harder over time. No Patrick. |
+| Harder tasks over time? Special characters (Patrick)? | Still open | Not built yet: every customer still orders the same six-step recipe and nothing gets harder over time. Random, lengthening orders are our Deliverable 4 feature (below). Patrick is dropped. |
 
 ### What doesn't work yet?
 
+- Randomized orders and rising difficulty are not built yet (our Deliverable 4 feature). Every customer still orders the same six-step recipe.
 - The end screen shows only the outcome, final score and ticks survived. `GameState` does not expose customers served or walkouts, so those are not shown.
 - Everything lives in one package, so the model/view boundary is not enforced by the compiler (see above).
 - [Missing or failing tests: name the file and test]
-- [Known bugs]
+- No known open bugs. We found and fixed these problems when combining our independent work: a file whose name did not match its class name; test files written against different JUnit versions (every test file now uses JUnit 5); and `LinkedQueue.enqueue` leaving the front of the queue empty on the first entry, which broke `peek` and the game.
 
 ## Next Steps (Deliverable 4)
 
 ### 1. Finishing the MVP, in order
 
-1. [e.g. Finish `GameController.run` and `parseChoice` with all bad-input cases]
-2. [e.g. Play one full shift end to end and fix bugs in the owning layer]
-3. [e.g. Add the missing model tests for each public method]
+1. Show customers served and walkouts on the end screen: add `getServed()` and `getWalkouts()` to `GameState` and `KrustyKrabGame` (the counters already exist in the game), then print them in `TerminalView`'s end screen.
 
 ### 2. Our change feature
 
-**Feature:** [name it. It must change model state or logic and be reachable through the controller and view. Examples: priority lane, skip/requeue, undo last serve, estimated wait per customer.]
+**Feature:** Random, lengthening orders (randomized ingredients plus rising difficulty).
 
-**What it does:** [two or three sentences]
+**What it does:** Each new customer gets a random order instead of the fixed six-step recipe. The bottom bun stays first and the top bun last so every order is still a burger, but the fillings (patty, cheese, lettuce, tomato) are chosen and ordered at random. The number of fillings in an order grows as the shift goes on, so early orders are short and late orders can use all four.
 
 **Prediction, to compare against what actually happens:**
 
 | Layer | Touches it? | Methods we expect to change |
 |---|---|---|
-| Model | [yes/no] | [e.g. `KrustyKrabGame.___`, `Customer.___`] |
-| View | [yes/no] | [e.g. `TerminalView.showMenu`, `showStats`] |
-| Controller | [yes/no] | [e.g. `GameController.parseChoice` range, `run`] |
+| Model | Yes | `KrustyKrabGame.addCustomerToLine`: pick and shuffle the fillings with the game's seeded `Random`, with the number of fillings growing with `tick` |
+| View | No | None. `TerminalView.showStats` already prints each customer's next step and steps left from `Customer.getSteps()`, so it works for any order |
+| Controller | No | None. `GameController.act` maps menu digits 1-6 to `Ingredient.values()`, which does not depend on the recipe |
 
-**Should not need to change:** [e.g. `LinkedQueue`, `Ingredient`, `GameObserver`, and why the design protects them]
+**Should not need to change:** `LinkedQueue`, `Customer`, `Ingredient`, `GameObserver`, `GameEvent`, `TerminalView`, `GameController`. `Customer` accepts any non-empty recipe through its constructor, and the view and controller read orders only through `getSteps()` and the fixed ingredient menu, so only the place that builds the recipe changes.
 
 ### 3. Stretch goals
 
-- **Committing to:** [list]
-- **Dropping:** [list: upgrades, rising difficulty, tutorial, Patrick, ...]
+- **Committing to:** Randomized ingredients, rising difficulty
+- **Dropping:** Upgrades, Patrick
 
 ### 4. New tests needed
 
-- [method > normal case, bad-input case]
-- [feature method > normal case, bad-input case]
-- [any remaining `GameController` / `parseChoice` tests]
+- `KrustyKrabGame.addCustomerToLine`, checked through `getLine()`: every order starts with `BOTTOM_BUN`, ends with `TOP_BUN` and repeats no ingredient; the same seed gives the same orders; an order late in the shift can be longer than the first. Bad input never reaches it, so the check is that a full 60-tick shift builds only valid, non-empty orders and never throws.
+- `GameControllerTest.runServesAnOrderThenQuits`: currently types the fixed `1 2 3 4 5 6`; it must read the front customer's steps from `getLine()` and type those instead.
+- `getServed()` / `getWalkouts()`: both 0 at the start; 1 after serving an order; the walkout count rises when a customer leaves. A `TerminalViewTest` check that the end screen shows both numbers.
 
 ### 5. Who does what
 
 | Item | Owner |
 |---|---|
-| [MVC leftover item] | [name] |
-| [change feature: model part] | [name] |
-| [change feature: view part] | [name] |
-| [tests] | [name] |
-| [README updates] | [name] |
+| End-screen counts: `getServed()` / `getWalkouts()` in `GameState` and `KrustyKrabGame` | Mckenna |
+| End-screen counts: `TerminalView` end screen and its test | Asher |
+| Change feature, model part: random, lengthening orders in `KrustyKrabGame.addCustomerToLine` | Mckenna |
+| Change feature, view part | None needed |
+| Tests: new model tests for random orders | Connor |
+| Tests: update `GameControllerTest.runServesAnOrderThenQuits` | Asher |
 
 ## Attribution
 
@@ -108,9 +108,15 @@ Yes, with one caveat. No model class mentions `TerminalView` or `GameController`
 | `GameObserver.java` | Mckenna | [how] |
 | `GameEvent.java` | Mckenna | [how] |
 | [Mckenna's test file] | Mckenna | [how] |
-| `TerminalView.java` | Asher | I used GenAI to point out any missing functionality and to hold me to what was outlined in the scope. I used Claude Sonnet 5.5 to assist with resolving issues caused by independent development |
-| `TerminalViewTest.java` | Asher | I used GenAI to point out any missing functionality and to hold me to what was outlined in the scope. I used Claude Sonnet 5.5 to assist with resolving issues caused by independent development|
-| `GameController.java` | Mckenna, Connor, Asher | [how] |
-| `GameControllerTest.java` | Mckenna, Connor, Asher | [how] |
+| `TerminalView.java` | Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify and resolve errors caused by independent development, such as the `getSteps()` return type mismatch and an extra closing brace in an earlier `KrustyKrabGame`. |
+| `TerminalViewTest.java` | Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify errors that surfaced when running the tests against the real model classes, such as the `LinkedQueue.enqueue` bug. |
+| `GameController.java` | Mckenna, Connor, Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify and resolve errors found when running the game end to end with scripted input, including the `LinkedQueue.enqueue` bug. |
+| `GameControllerTest.java` | Mckenna, Connor, Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify test-setup errors from independent development, such as the JUnit 4 versus JUnit 5 mismatch. |
+
 ### GenAI Note
 
+Asher used Claude Sonnet 5.5 to help debug and to identify errors that came from our independently written classes not fitting together. That check found that `Customer.getSteps()` returns a `List`, not a `LinkedQueue`, so the view reads steps as a list; an extra closing brace in an earlier `KrustyKrabGame` upload; `LinkedQueue.enqueue` setting the front to `null` instead of the new node on the first entry, which made `peek` fail and four of `ConnorsTest`'s tests fail; and `ConnorsTest` importing JUnit 4 while the project uses JUnit 5. All four have since been fixed in the project.
+
+For the change feature, Asher asked: "Which file needs to change so that there is some randomization of the ingredients in the burger?" Claude answered that only `KrustyKrabGame.addCustomerToLine` builds recipes, that `Customer` accepts any non-empty recipe, and that the view and controller already work with any order, but that tests assuming the fixed `1 2 3 4 5 6` order would break. Our prediction above follows that answer.
+
+[State what each person reviewed or changed afterward. Mckenna and Connor: say whether you used GenAI for your files.]
