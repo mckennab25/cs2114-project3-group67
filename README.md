@@ -119,4 +119,6 @@ Asher used Claude Sonnet 5.5 to help debug and to identify errors that came from
 
 For the change feature, Asher asked: "Which file needs to change so that there is some randomization of the ingredients in the burger?" Claude answered that only `KrustyKrabGame.addCustomerToLine` builds recipes, that `Customer` accepts any non-empty recipe, and that the view and controller already work with any order, but that tests assuming the fixed `1 2 3 4 5 6` order would break. Our prediction above follows that answer.
 
+GenAI was also useful for the generation and refinement of a README that fulfils each component listed in the rubric.
+
 [State what each person reviewed or changed afterward. Mckenna and Connor: say whether you used GenAI for your files.]
