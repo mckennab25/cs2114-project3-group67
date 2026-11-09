@@ -108,8 +108,8 @@ Yes, with one caveat. No model class mentions `TerminalView` or `GameController`
 | `GameObserver.java` | Mckenna | [how] |
 | `GameEvent.java` | Mckenna | [how] |
 | [Mckenna's test file] | Mckenna | [how] |
-| `TerminalView.java` | Asher | [how] |
-| `TerminalViewTest.java` | Asher | [how] |
+| `TerminalView.java` | Asher | I used GenAI to point out any missing functionality and to hold me to what was outlined in the scope. I used Claude Sonnet 5.5 to assist with resolving issues caused by independent development |
+| `TerminalViewTest.java` | Asher | I used GenAI to point out any missing functionality and to hold me to what was outlined in the scope. I used Claude Sonnet 5.5 to assist with resolving issues caused by independent development|
 | `GameController.java` | Mckenna, Connor, Asher | [how] |
 | `GameControllerTest.java` | Mckenna, Connor, Asher | [how] |
 ### GenAI Note
