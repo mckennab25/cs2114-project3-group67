@@ -19,7 +19,7 @@ Built for Eclipse (JUnit 5 on the classpath). <!-- Confirm every test file uses 
 | Area | Spec said | We built | Why |
 |---|---|---|---|
 | `Customer.getSteps()` | Customer holds a `LinkedQueue<Ingredient>` the view can read | Returns a `List<Ingredient>` snapshot, copied by a package-private `LinkedQueue.snapshot()` | The view should not see the queue type or be able to change a customer's order (draft, verify) |
-| Observer timing | The model notifies observers at the end of each tick | `runTick` notifies the action result first, then state events (raid, walkout, arrival, end) as they happen | [reason] |
+| Observer timing | The model notifies observers at the end of each tick | `runTick` notifies the action result first, then state events (raid, walkout, arrival, end) as they happen |  |
 | Screen redraw | `update()` redraws the screen from the `GameState` it receives | `update()` prints one line per event plus the end screen; the controller calls `showStats(state)` after each action | The action-result event fires before `runTick` advances the tick, ages customers and rolls for a raid, so the state at that moment is one tick stale; after the action returns it is current |
 | Menu prompt | `showMenu()` prints the numbered menu | `showMenu()` also ends with a `Choose: ` prompt | The controller has no output stream of its own (its fields are the game, the view and the `Scanner`), so the view prints the prompt |
 | Packages | Separate model, view and controller packages | Everything is in the single package `krustykrab` | `Customer.losePatience()` and `LinkedQueue.snapshot()` are package-private so only model code can call them; splitting the packages would have forced them to be public |
