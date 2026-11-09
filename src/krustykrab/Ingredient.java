@@ -6,7 +6,7 @@ public enum Ingredient
     BOTTOM_BUN,
     PATTY,
     CHEESE,
-    LETTICE,
+    LETTUCE,
     TOMATO,
     TOP_BUN
 }

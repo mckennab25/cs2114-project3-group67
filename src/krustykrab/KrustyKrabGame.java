@@ -365,4 +365,4 @@ public class KrustyKrabGame implements GameState
         return raidTicksLeft; 
     }
 }
-}
+
