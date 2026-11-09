@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class KrustyKrabGame implements GameState
+public class KrustyKrabGame
+    implements GameState
 {
     // ~ Fields ................................................................
     // default fields to establish the game (ticks per customer, losing
@@ -223,34 +224,44 @@ public class KrustyKrabGame implements GameState
     {
         return outcome;
     }
-    
- // --- Private Helper Mechanics ---
+
+    // --- Private Helper Mechanics ---
+
 
     /**
      * Executes the internal update cycle for a single tick action.
-     * 
-     * <p>Processes observers, ticks down active raids, rolls for new raids, ages customer patience,
-     * checks for walkouts, handles new customer arrivals, and checks shift completion.</p>
+     * <p>
+     * Processes observers, ticks down active raids, rolls for new raids, ages
+     * customer patience, checks for walkouts, handles new customer arrivals,
+     * and checks shift completion.
+     * </p>
      *
-     * @param actionResult the immediate outcome event resulting from the player's action
+     * @param actionResult
+     *            the immediate outcome event resulting from the player's action
      */
-    private void runTick(GameEvent actionResult) {
+    private void runTick(GameEvent actionResult)
+    {
         // Notify result of the immediate action taken
         notifyObservers(actionResult);
 
         tick++;
 
         // 1. Process active raid window
-        if (isRaidActive()) {
+        if (isRaidActive())
+        {
             raidTicksLeft--;
-            if (raidTicksLeft <= 0) {
+            if (raidTicksLeft <= 0)
+            {
                 outcome = GameEvent.LOST_FORMULA;
                 notifyObservers(GameEvent.LOST_FORMULA);
                 return;
             }
-        } else {
+        }
+        else
+        {
             // Roll for new raid
-            if (random.nextInt(100) < planktonChance) {
+            if (random.nextInt(100) < planktonChance)
+            {
                 raidTicksLeft = RAID_WINDOW;
                 notifyObservers(GameEvent.RAID_STARTED);
             }
@@ -258,94 +269,118 @@ public class KrustyKrabGame implements GameState
 
         // 2. Age customers in line (rotate queue)
         int currentSize = line.getSize();
-        for (int i = 0; i < currentSize; i++) {
+        for (int i = 0; i < currentSize; i++)
+        {
             Customer c = line.dequeue();
             c.losePatience(); // Package-private access inside model package
 
-            if (c.hasWalkedOut()) {
+            if (c.hasWalkedOut())
+            {
                 walkouts++;
                 notifyObservers(GameEvent.CUSTOMER_WALKED_OUT);
-                if (walkouts >= MAX_WALKOUTS && outcome == null) {
+                if (walkouts >= MAX_WALKOUTS && outcome == null)
+                {
                     outcome = GameEvent.LOST_WALKOUTS;
                     notifyObservers(GameEvent.LOST_WALKOUTS);
                     return;
                 }
-            } else {
+            }
+            else
+            {
                 line.enqueue(c);
             }
         }
 
         // 3. Arrivals every ARRIVAL_INTERVAL ticks
-        if (tick % ARRIVAL_INTERVAL == 0) {
-            if (line.getSize() < MAX_LINE_SIZE) {
+        if (tick % ARRIVAL_INTERVAL == 0)
+        {
+            if (line.getSize() < MAX_LINE_SIZE)
+            {
                 addCustomerToLine();
                 notifyObservers(GameEvent.CUSTOMER_ARRIVED);
             }
         }
 
         // 4. Shift check
-        if (tick >= SHIFT_DURATION && outcome == null) {
+        if (tick >= SHIFT_DURATION && outcome == null)
+        {
             outcome = GameEvent.WON;
             notifyObservers(GameEvent.WON);
         }
     }
-    
+
+
     /**
      * Emits a game event update to all currently registered observers.
      *
-     * @param event the event to broadcast
+     * @param event
+     *            the event to broadcast
      */
-    private void notifyObservers(GameEvent event) {
-        for (GameObserver o : observers) {
+    private void notifyObservers(GameEvent event)
+    {
+        for (GameObserver o : observers)
+        {
             o.update(this, event);
         }
     }
-    
-    /** NEED TO CHECK IF THIS IS THE ONLY RECIPE
-     * Creates a new customer with the standard 6-step recipe and adds them to the end of the customer queue.
+
+
+    /**
+     * NEED TO CHECK IF THIS IS THE ONLY RECIPE Creates a new customer with the
+     * standard 6-step recipe and adds them to the end of the customer queue.
      */
-    private void addCustomerToLine() {
+    private void addCustomerToLine()
+    {
         List<Ingredient> standardRecipe = Arrays.asList(
             Ingredient.BOTTOM_BUN,
             Ingredient.PATTY,
             Ingredient.CHEESE,
             Ingredient.LETTUCE,
             Ingredient.TOMATO,
-            Ingredient.TOP_BUN
-        );
-        line.enqueue(new Customer(nextCustomerId++, standardRecipe, DEFAULT_PATIENCE));
+            Ingredient.TOP_BUN);
+        line.enqueue(
+            new Customer(nextCustomerId++, standardRecipe, DEFAULT_PATIENCE));
     }
-    
- // --- GameState Interface Getters ---
+
+    // --- GameState Interface Getters ---
+
 
     /** */
     @Override
-    public int getTick() { 
-        return tick; 
+    public int getTick()
+    {
+        return tick;
     }
+
 
     /** */
     @Override
-    public int getTicksLeft() { 
-        return SHIFT_DURATION - tick; 
+    public int getTicksLeft()
+    {
+        return SHIFT_DURATION - tick;
     }
+
 
     /** */
     @Override
-    public int getScore() { 
-        return score; 
+    public int getScore()
+    {
+        return score;
     }
+
 
     /**
-     * 
-     * 
-     * Returns a defensive copy of the customer line so external views cannot modify internal state.</p>
+     * Returns a defensive copy of the customer line so external views cannot
+     * modify internal state.
+     * </p>
      */
     @Override
-    public List<Customer> getLine() {
+    public List<Customer> getLine()
+    {
         List<Customer> copy = new ArrayList<>();
         int size = line.getSize();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             Customer c = line.dequeue();
             copy.add(c);
             line.enqueue(c);
@@ -353,16 +388,19 @@ public class KrustyKrabGame implements GameState
         return copy;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isRaidActive() { 
-        return raidTicksLeft > 0; 
-    }
 
     /** {@inheritDoc} */
     @Override
-    public int getRaidTicksLeft() { 
-        return raidTicksLeft; 
+    public boolean isRaidActive()
+    {
+        return raidTicksLeft > 0;
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public int getRaidTicksLeft()
+    {
+        return raidTicksLeft;
     }
 }
-
