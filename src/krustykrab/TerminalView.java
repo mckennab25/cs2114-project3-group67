@@ -66,7 +66,7 @@ public class TerminalView implements GameObserver
     // ----------------------------------------------------------
     /**
      * Prints the numbered menu: one choice per ingredient, then Defend and
-     * Quit.
+     * Quit, ending with a prompt.
      */
     public void showMenu()
     {
@@ -78,6 +78,7 @@ public class TerminalView implements GameObserver
         }
         out.println("  7. Defend the formula");
         out.println("  8. Quit (or q)");
+        out.print("Choose: ");
     }
 
 
