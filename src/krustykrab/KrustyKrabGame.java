@@ -318,28 +318,28 @@ public class KrustyKrabGame implements GameState
     
  // --- GameState Interface Getters ---
 
-    /** {@inheritDoc} */
+    /** */
     @Override
     public int getTick() { 
         return tick; 
     }
 
-    /** {@inheritDoc} */
+    /** */
     @Override
     public int getTicksLeft() { 
         return SHIFT_DURATION - tick; 
     }
 
-    /** {@inheritDoc} */
+    /** */
     @Override
     public int getScore() { 
         return score; 
     }
 
     /**
-     * {@inheritDoc}
      * 
-     * <p>Returns a defensive copy of the customer line so external views cannot modify internal state.</p>
+     * 
+     * Returns a defensive copy of the customer line so external views cannot modify internal state.</p>
      */
     @Override
     public List<Customer> getLine() {
