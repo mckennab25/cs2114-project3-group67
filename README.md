@@ -103,11 +103,11 @@ Yes, with one caveat. No model class mentions `TerminalView` or `GameController`
 | `Customer.java` | Connor | [how] |
 | `Ingredient.java` | Connor | [how] |
 | `ConnorsTest.java` | Connor | [how] |
-| `KrustyKrabGame.java` | Mckenna | [how] |
-| `GameState.java` | Mckenna | [how] |
-| `GameObserver.java` | Mckenna | [how] |
-| `GameEvent.java` | Mckenna | [how] |
-| [Mckenna's test file] | Mckenna | [how] |
+| `KrustyKrabGame.java` | Mckenna | Used GenAI to understand the interaction between the View and Observer, used methods from the spec doc, implements GameState |
+| `GameState.java` | Mckenna | Used spec doc method signatures to make this interface to be implemented by KrustyKrabGame |
+| `GameObserver.java` | Mckenna | Used the spec doc to make the update method |
+| `GameEvent.java` | Mckenna | Used the spec doc and some GenAI to propose other events that can happen during the game |
+| [Mckenna's test file] | Mckenna | Test file to make sure I set up GitHub correctly |
 | `TerminalView.java` | Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify and resolve errors caused by independent development, such as the `getSteps()` return type mismatch and an extra closing brace in an earlier `KrustyKrabGame`. |
 | `TerminalViewTest.java` | Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify errors that surfaced when running the tests against the real model classes, such as the `LinkedQueue.enqueue` bug. |
 | `GameController.java` | Mckenna, Connor, Asher | GenAI-assisted (debugging): Claude Sonnet 5.5 helped identify and resolve errors found when running the game end to end with scripted input, including the `LinkedQueue.enqueue` bug. |
