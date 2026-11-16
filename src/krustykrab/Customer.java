@@ -7,27 +7,44 @@ public class Customer
     private final int id;
     private int patience;
     private final LinkedQueue<Ingredient> steps;
+    private final boolean patrick;
+    private final int rewardPoints;
     
     public Customer(int id, List<Ingredient> recipe, int patience)
     {
-        
+        this(id, recipe, patience, false);
+    }
+
+    public Customer(
+        int id,
+        List<Ingredient> recipe,
+        int patience,
+        boolean patrick)
+    {
         if (recipe == null || recipe.isEmpty())
         {
-            throw new IllegalArgumentException("Recipe must have ingredients");
-            
+            throw new IllegalArgumentException(
+                "Recipe must have ingredients");
         }
-        
+
         if (patience <= 0)
         {
-            throw new IllegalArgumentException("Patience must be positive");
+            throw new IllegalArgumentException(
+                "Patience must be positive");
         }
-        
+
         this.id = id;
-        this.patience = patience;
+        this.patrick = patrick;
+        this.patience = patrick ? 1 : patience;
+
+        // Example scoring: regular customers = 10, Patrick = 30.
+        this.rewardPoints = patrick ? 30 : 10;
+
         steps = new LinkedQueue<>();
-        for (Ingredient i : recipe)
+
+        for (Ingredient ingredient : recipe)
         {
-            steps.enqueue(i);
+            steps.enqueue(ingredient);
         }
     }
     
@@ -35,9 +52,11 @@ public class Customer
     {
         if (ing == null)
         {
-            throw new IllegalArgumentException("Ingredient cannot be null");
+            throw new IllegalArgumentException(
+                "Ingredient cannot be null");
         }
-        if (isServed() || steps.peek() != ing)
+
+        if (hasWalkedOut() || isServed() || steps.peek() != ing)
         {
             return false;
         }
@@ -77,6 +96,21 @@ public class Customer
     public List<Ingredient> getSteps()
     {
         return steps.snapshot();
+    }
+    
+    public boolean isPatrick()
+    {
+        return patrick;
+    }
+
+    public String getName()
+    {
+        return patrick ? "Patrick" : "Customer " + id;
+    }
+
+    public int getRewardPoints()
+    {
+        return rewardPoints;
     }
     
     

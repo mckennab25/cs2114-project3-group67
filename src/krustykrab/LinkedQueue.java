@@ -26,7 +26,7 @@ public class LinkedQueue<T>
         
         if (b == null)
         {
-            f = null;
+            f = node;
         }
         else
         {

@@ -1,6 +1,9 @@
 package krustykrab;
 
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 // -------------------------------------------------------------------------
 /**
@@ -53,33 +56,124 @@ public class GameController
      */
     public void run()
     {
-        view.showStats(game);
-        while (!game.isOver())
-        {
-            view.showMenu();
-            if (!in.hasNextLine())
-            {
-                game.quit();
-                break;
-            }
+        final long tickNanos = TimeUnit.SECONDS.toNanos(10);
+        final BlockingQueue<String> inputs =
+            new LinkedBlockingQueue<>();
 
-            int choice;
+        final String endOfInput = new String();
+
+        Thread inputReader = new Thread(() ->
+        {
             try
             {
-                choice = parseChoice(in.nextLine());
+                while (in.hasNextLine())
+                {
+                    inputs.add(in.nextLine());
+                }
             }
-            catch (IllegalArgumentException e)
+            finally
             {
-                view.showError(e.getMessage());
-                continue;
+                inputs.add(endOfInput);
             }
+        });
 
-            act(choice);
-            if (!game.isOver())
+        inputReader.setDaemon(true);
+        inputReader.start();
+
+        long nextTick = System.nanoTime() + tickNanos;
+        Customer previousFront = frontCustomer();
+
+        view.showStats(game);
+        view.showMenu();
+
+        try
+        {
+            while (!game.isOver())
             {
-                view.showStats(game);
+                long wait = Math.max(
+                    0L, nextTick - System.nanoTime());
+
+                String raw = inputs.poll(
+                    wait, TimeUnit.NANOSECONDS);
+
+                long now = System.nanoTime();
+                boolean timeChanged = false;
+
+                while (now >= nextTick && !game.isOver())
+                {
+                    game.advanceTime();
+                    nextTick += tickNanos;
+                    timeChanged = true;
+                }
+
+                if (game.isOver())
+                {
+                    break;
+                }
+
+                if (raw == endOfInput)
+                {
+                    game.quit();
+                    break;
+                }
+
+                if (raw != null)
+                {
+                    try
+                    {
+                        act(parseChoice(raw));
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        view.showError(e.getMessage());
+                    }
+                }
+
+                if (game.isOver())
+                {
+                    break;
+                }
+
+                Customer currentFront = frontCustomer();
+
+                if (currentFront != previousFront
+                    && currentFront != null
+                    && currentFront.isPatrick())
+                {
+                    nextTick = System.nanoTime() + tickNanos;
+
+                    System.out.println(
+                        "Patrick is up! Finish his order "
+                        + "within 5 seconds for 20 bonus points!");
+                }
+
+                previousFront = currentFront;
+
+                if (raw != null)
+                {
+                    view.showStats(game);
+                    view.showMenu();
+                }
+                else if (timeChanged)
+                {
+                    System.out.println();
+                    view.showStats(game);
+                    System.out.print("Choose: ");
+                }
             }
         }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            game.quit();
+        }
+    }
+    
+    private Customer frontCustomer()
+    {
+        java.util.List<Customer> customers = game.getLine();
+
+        return customers.isEmpty() ? null : customers.get(0);
     }
 
 

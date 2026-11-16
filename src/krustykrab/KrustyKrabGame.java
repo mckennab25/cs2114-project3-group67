@@ -17,6 +17,7 @@ public class KrustyKrabGame implements GameState
     public static final int DEFAULT_PATIENCE = 20;
     public static final int MAX_WALKOUTS = 3;
     public static final int RAID_WINDOW = 3;
+    private static final int PATRICK_CHANCE = 15;
 
     private final LinkedQueue<Customer> line;
     private final List<GameObserver> observers;
@@ -126,13 +127,26 @@ public class KrustyKrabGame implements GameState
 
             if (correct)
             {
-                if (current.isServed())
-                {
-                    score += 10 + current.getPatience();
-                    line.dequeue();
-                    served++;
-                    actionResult = GameEvent.ORDER_SERVED;
-                }
+            	if (current.isServed())
+            	{
+            	    score += 10 + current.getPatience();
+
+            	    if (current.isPatrick())
+            	    {
+            	        score += 20;
+            	    }
+
+            	    // Remove the served customer exactly once.
+            	    line.dequeue();
+            	    served++;
+
+            	    if (line.isEmpty())
+            	    {
+            	        addCustomerToLine();
+            	    }
+
+            	    actionResult = GameEvent.ORDER_SERVED;
+            	}
                 else
                 {
                     actionResult = GameEvent.CORRECT_STEP;
@@ -145,7 +159,7 @@ public class KrustyKrabGame implements GameState
             }
         }
 
-        runTick(actionResult);
+        notifyObservers(actionResult);
         return actionResult;
     }
 
@@ -179,7 +193,7 @@ public class KrustyKrabGame implements GameState
             actionResult = GameEvent.NO_THREAT;
         }
 
-        runTick(actionResult);
+        notifyObservers(actionResult);
         return actionResult;
     }
 
@@ -234,9 +248,11 @@ public class KrustyKrabGame implements GameState
      *
      * @param actionResult the immediate outcome event resulting from the player's action
      */
-    private void runTick(GameEvent actionResult) {
+    public void advanceTime() {
         // Notify result of the immediate action taken
-        notifyObservers(actionResult);
+        if (isOver()) {
+        	return;
+        }
 
         tick++;
 
@@ -257,30 +273,50 @@ public class KrustyKrabGame implements GameState
         }
 
         // 2. Age customers in line (rotate queue)
-        int currentSize = line.getSize();
-        for (int i = 0; i < currentSize; i++) {
-            Customer c = line.dequeue();
-            c.losePatience(); // Package-private access inside model package
+     
+        Customer front = line.isEmpty() ? null : line.peek();
 
-            if (c.hasWalkedOut()) {
+        int currentSize = line.getSize();
+
+        for (int i = 0; i < currentSize; i++)
+        {
+            Customer c = line.dequeue();
+
+            // Patrick only loses patience when being served.
+            if (!c.isPatrick() || c == front)
+            {
+                c.losePatience();
+            }
+
+            if (c.hasWalkedOut())
+            {
                 walkouts++;
                 notifyObservers(GameEvent.CUSTOMER_WALKED_OUT);
-                if (walkouts >= MAX_WALKOUTS && outcome == null) {
-                    outcome = GameEvent.LOST_WALKOUTS;
-                    notifyObservers(GameEvent.LOST_WALKOUTS);
-                    return;
-                }
-            } else {
+            }
+            else
+            {
                 line.enqueue(c);
             }
         }
 
+        if (walkouts >= MAX_WALKOUTS)
+        {
+            outcome = GameEvent.LOST_WALKOUTS;
+            notifyObservers(GameEvent.LOST_WALKOUTS);
+            return;
+        }
+
         // 3. Arrivals every ARRIVAL_INTERVAL ticks
-        if (tick % ARRIVAL_INTERVAL == 0) {
-            if (line.getSize() < MAX_LINE_SIZE) {
-                addCustomerToLine();
-                notifyObservers(GameEvent.CUSTOMER_ARRIVED);
-            }
+    	// Add a customer immediately if everyone has left.
+        // Otherwise, add customers at the normal interval.
+        if (line.isEmpty()
+        		|| tick % ARRIVAL_INTERVAL == 0)
+        {
+        	if (line.getSize() < MAX_LINE_SIZE)
+         	{
+        		addCustomerToLine();
+             	notifyObservers(GameEvent.CUSTOMER_ARRIVED);
+         	}
         }
 
         // 4. Shift check
@@ -304,16 +340,38 @@ public class KrustyKrabGame implements GameState
     /** NEED TO CHECK IF THIS IS THE ONLY RECIPE
      * Creates a new customer with the standard 6-step recipe and adds them to the end of the customer queue.
      */
-    private void addCustomerToLine() {
-        List<Ingredient> standardRecipe = Arrays.asList(
-            Ingredient.BOTTOM_BUN,
+    /**
+     * Creates a customer with a random recipe.
+     * Bottom bun is always first and top bun is always last.
+     */
+    private void addCustomerToLine()
+    {
+        List<Ingredient> recipe = new ArrayList<>();
+
+        recipe.add(Ingredient.BOTTOM_BUN);
+
+        Ingredient[] optionalIngredients = {
             Ingredient.PATTY,
             Ingredient.CHEESE,
             Ingredient.LETTUCE,
-            Ingredient.TOMATO,
-            Ingredient.TOP_BUN
-        );
-        line.enqueue(new Customer(nextCustomerId++, standardRecipe, DEFAULT_PATIENCE));
+            Ingredient.TOMATO
+        };
+
+        for (Ingredient ingredient : optionalIngredients)
+        {
+            if (random.nextBoolean())
+            {
+                recipe.add(ingredient);
+            }
+        }
+
+        recipe.add(Ingredient.TOP_BUN);
+        boolean patrick = random.nextInt(100) < PATRICK_CHANCE;
+        line.enqueue(new Customer(
+            nextCustomerId++,
+            recipe,
+            DEFAULT_PATIENCE,
+            patrick));
     }
     
  // --- GameState Interface Getters ---
