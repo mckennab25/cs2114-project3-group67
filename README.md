@@ -14,6 +14,7 @@ Built for Eclipse (JUnit 5 on the classpath). <!-- Confirm every test file uses 
 
 ## Reflection
 
+
 ### What changed from the specification?
 
 | Area | Spec said | We built | Why |
@@ -51,6 +52,20 @@ Yes, with one caveat. No model class mentions `TerminalView` or `GameController`
 - [Missing or failing tests: name the file and test]
 - No known open bugs. We found and fixed these problems when combining our independent work: a file whose name did not match its class name; test files written against different JUnit versions (every test file now uses JUnit 5); and `LinkedQueue.enqueue` leaving the front of the queue empty on the first entry, which broke `peek` and the game.
 
+## Reflection (Deliverable 5)
+
+### What changed from your D3 plan?
+- Added a patience timer of 60 seconds rather than ticks
+- Each customer has a randomly assigned patience timer with a base of 5 up to 15 seconds
+- Patrick is added and has one tick and will leave leave if not served in time
+- Randomized orders are added so it's not just the base burger for every customer
+- The end screen was edited
+
+### What doesn't work yet
+- Want to add more increasing difficulty in terms of ingredients
+- Need to edit test classes to match the changes added with the addition of patience timers
+
+
 ## Next Steps (Deliverable 4)
 
 ### 1. Finishing the MVP, in order
@@ -62,6 +77,19 @@ Yes, with one caveat. No model class mentions `TerminalView` or `GameController`
 **Feature:** Random, lengthening orders (randomized ingredients plus rising difficulty).
 
 **What it does:** Each new customer gets a random order instead of the fixed six-step recipe. The bottom bun stays first and the top bun last so every order is still a burger, but the fillings (patty, cheese, lettuce, tomato) are chosen and ordered at random. The number of fillings in an order grows as the shift goes on, so early orders are short and late orders can use all four.
+
+## Next Steps (Deliverable 5)
+
+### 1. Add customer names so that it is not just labeled as Customer 1, 2, ...
+
+### 2. Add more random ingredients
+- Add more ingredients to add a bit more difficulty for the game and it's not just a limited number of ingredients to add 1-6
+
+### 3-minute Demo
+- Will show the game layout walking through playing the game with customer patience timers being  over time and customers leaving
+- The changing order recipes
+- Bad input being added with will be redirected
+- The game will run for 60 seconds in order to display the end game statistics screen
 
 **Prediction, to compare against what actually happens:**
 
