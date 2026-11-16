@@ -56,7 +56,7 @@ public class GameController
      */
     public void run()
     {
-        final long tickNanos = TimeUnit.SECONDS.toNanos(10);
+    	long tickNanos = tickDurationNanos();
         final BlockingQueue<String> inputs =
             new LinkedBlockingQueue<>();
 
@@ -133,7 +133,18 @@ public class GameController
                 {
                     break;
                 }
+                long newDuration = tickDurationNanos();
 
+                if (newDuration != tickNanos)
+                {
+                    tickNanos = newDuration;
+                    nextTick = System.nanoTime() + tickNanos;
+
+                    view.showNotice(
+                        "SPEED UP! Ticks now last "
+                        + TimeUnit.NANOSECONDS.toSeconds(tickNanos)
+                        + " seconds.");
+                }
                 Customer currentFront = frontCustomer();
 
                 if (currentFront != previousFront
@@ -142,9 +153,11 @@ public class GameController
                 {
                     nextTick = System.nanoTime() + tickNanos;
 
-                    System.out.println(
-                        "Patrick is up! Finish his order "
-                        + "within 5 seconds for 20 bonus points!");
+                    view.showNotice(
+                    	    "*** PATRICK IS AT THE COUNTER! *** "
+                    	    + "Finish his order within "
+                    	    + TimeUnit.NANOSECONDS.toSeconds(tickNanos)
+                    	    + " seconds for 20 BONUS POINTS!");
                 }
 
                 previousFront = currentFront;
@@ -239,5 +252,13 @@ public class GameController
         {
             game.addIngredient(Ingredient.values()[choice - 1]);
         }
+    }
+    
+    private long tickDurationNanos()
+    {
+        int milliseconds = Math.max(
+            1000, 5000 - (game.getServed() / 3) * 1000);
+
+        return TimeUnit.MILLISECONDS.toNanos(milliseconds);
     }
 }

@@ -122,13 +122,18 @@ public class TerminalView implements GameObserver
         }
 
         Customer front = line.get(0);
+        if (front.isPatrick())
+        {
+            out.println(
+                "*** PATRICK! 1 PATIENCE | +20 BONUS POINTS ***");
+        }
         List<Ingredient> steps = front.getSteps();
-        out.println("Serving customer " + front.getId() + " (patience "
+        out.println("Serving " + front.getName() + " (patience "
             + front.getPatience() + "): next is " + label(steps.get(0))
             + " (steps left: " + steps.size() + ")");
         for (int i = 1; i < line.size(); i++)
         {
-            out.println("Waiting: customer " + line.get(i).getId()
+            out.println("Waiting: " + line.get(i).getName()
                 + " (patience " + line.get(i).getPatience() + ")");
         }
     }
@@ -182,5 +187,12 @@ public class TerminalView implements GameObserver
             default:
                 return "You quit the shift.";
         }
+        
+        
+    }
+    public void showNotice(String text)
+    {
+        out.println();
+        out.println(text);
     }
 }

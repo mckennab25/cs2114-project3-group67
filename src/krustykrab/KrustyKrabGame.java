@@ -1,7 +1,6 @@
 package krustykrab;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -18,7 +17,7 @@ public class KrustyKrabGame
     public static final int DEFAULT_PATIENCE = 20;
     public static final int MAX_WALKOUTS = 3;
     public static final int RAID_WINDOW = 3;
-    private static final int PATRICK_CHANCE = 15;
+    private static final int PATRICK_CHANCE = 20;
 
     private final LinkedQueue<Customer> line;
     private final List<GameObserver> observers;
@@ -393,10 +392,13 @@ public class KrustyKrabGame
 
         recipe.add(Ingredient.TOP_BUN);
         boolean patrick = random.nextInt(100) < PATRICK_CHANCE;
+     // Random patience from 5 through 15.
+        int patience = 5 + random.nextInt(11);
+
         line.enqueue(new Customer(
             nextCustomerId++,
             recipe,
-            DEFAULT_PATIENCE,
+            patience,
             patrick));
 
     }
@@ -462,4 +464,13 @@ public class KrustyKrabGame
     {
         return raidTicksLeft;
     }
+    
+    public int getServed()
+    {
+        return served;
+    }
+    
+    
+    
+    
 }
